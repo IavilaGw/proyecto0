@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	database "github.com/IavilaGw/proyecto0/config"
@@ -108,4 +109,22 @@ func ListarTareasPorUsuario(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, tareas)
+
+}
+
+func ObtenerTareaPorID(c *gin.Context) {
+	tareaIDStr := c.Param("id")
+	tareaID, err := strconv.Atoi(tareaIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de tarea inválido"})
+		return
+	}
+
+	var tarea models.Tarea
+	if err := database.DB.First(&tarea, tareaID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Tarea no encontrada"})
+		return
+	}
+
+	c.JSON(http.StatusOK, tarea)
 }
