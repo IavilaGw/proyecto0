@@ -24,4 +24,6 @@ func Register(r *gin.Engine) {
 	t.DELETE("/:id", controllers.EliminarTarea)
 	t.GET("/usuario", controllers.ListarTareasPorUsuario)
 	t.GET("/:id",controllers.ObtenerTareaPorID)
+
+
 }
