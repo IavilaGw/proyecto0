@@ -1,25 +1,73 @@
 const taskListEl = document.getElementById('taskList');
 const catListEl  = document.getElementById('catList');
 const taskCatSel = document.getElementById('taskCat');
+const tabs = document.querySelectorAll('.tab');
+const menuBtns = document.querySelectorAll('.menu .menu-item');
 
+let ALL_TASKS = [];
+let CURRENT_FILTER = 'all';
+
+// ---- User bar ----
+const unameEl  = document.getElementById('uname');
+const avatarEl = document.getElementById('avatar');
+const changeAvatarBtn = document.getElementById('changeAvatarBtn');
+const setAvatarUrlBtn = document.getElementById('setAvatarUrlBtn');
+const avatarFile = document.getElementById('avatarFile');
+
+function loadUserbar(){
+  const name = localStorage.getItem('username') || 'User';
+  const stored = localStorage.getItem('avatarUrl');
+  const avatar = stored || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=E5E7EB&color=111827`;
+  unameEl.textContent = name;
+  avatarEl.src = avatar;
+}
+changeAvatarBtn.onclick = ()=> avatarFile.click();
+avatarFile.onchange = (e)=>{
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const rd = new FileReader();
+  rd.onload = () => { localStorage.setItem('avatarUrl', rd.result); loadUserbar(); };
+  rd.readAsDataURL(file);
+};
+setAvatarUrlBtn.onclick = ()=>{
+  const url = prompt('Paste image URL');
+  if (!url) return;
+  localStorage.setItem('avatarUrl', url);
+  loadUserbar();
+};
+
+// ---- Auth/logout ----
 document.getElementById('logoutBtn').onclick = () => { auth.logout(); location.href = 'index.html'; };
 
-// Tabs/menus
-document.querySelectorAll('.menu .menu-item').forEach(btn=>{
-  btn.addEventListener('click', () => switchView(btn.dataset.view, btn));
+// ---- Menu switching ----
+menuBtns.forEach(btn=>{
+  btn.addEventListener('click', () => {
+    menuBtns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const view = btn.dataset.view;
+    document.getElementById('categoriesSection').classList.toggle('hidden', view!=='categories');
+    document.getElementById('tasksSection').classList.toggle('hidden', view==='categories');
+    document.getElementById('viewTitle').textContent = view==='categories' ? 'Categories' : 'My Tasks';
+  });
 });
-function switchView(view, btn){
-  document.querySelectorAll('.menu .menu-item').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
 
-  document.getElementById('categoriesSection').classList.toggle('hidden', view!=='categories');
-  document.getElementById('tasksSection').classList.toggle('hidden', view==='categories');
-  document.getElementById('viewTitle').textContent = view==='categories' ? 'Categories' : 'My Tasks';
-}
+// ---- Tabs / filters ----
+tabs.forEach(t => t.addEventListener('click', ()=>{
+  tabs.forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  CURRENT_FILTER = t.dataset.filter;
+  renderTasks(ALL_TASKS);
+}));
 
-// Cargar datos iniciales
+// ---- Search ----
+document.getElementById('search').addEventListener('input', (e)=>{
+  renderTasks(ALL_TASKS, e.target.value.trim().toLowerCase());
+});
+
+// ---- Init ----
 init();
 async function init(){
+  loadUserbar();
   await Promise.all([loadCategories(), loadMyTasks()]);
 }
 
@@ -30,32 +78,32 @@ async function loadCategories(){
   const data = await res.json();
   if (!res.ok) { catListEl.innerHTML = `<li class="muted">Error: ${data.message||res.status}</li>`; return; }
 
-  // data: lista de categorías (se asume {ID, Nombre, Descripcion})
   catListEl.innerHTML = '';
   taskCatSel.innerHTML = '<option value="">Select category</option>';
+
   (data || []).forEach(c => {
-    // Relleno select para crear tareas
+    const id   = c.ID ?? c.id ?? c.Id;
+    const name = c.Nombre ?? c.nombre ?? '';
+    const desc = c.Descripcion ?? c.descripcion ?? '';
+
     const opt = document.createElement('option');
-    opt.value = c.ID ?? c.id ?? c.Id;
-    opt.textContent = c.Nombre ?? c.nombre;
+    opt.value = id;
+    opt.textContent = name;
     taskCatSel.appendChild(opt);
 
-    // Ítem de lista
     const li = document.createElement('li');
     li.className = 'item';
     li.innerHTML = `
       <div class="meta">
-        <strong>${c.Nombre ?? c.nombre}</strong>
-        <small>${c.Descripcion ?? c.descripcion ?? ''}</small>
-
+        <strong>${name}</strong>
+        <small>${desc}</small>
       </div>
       <div class="actions">
-        <button class="btn btn-danger" data-del-cat="${opt.value}">Delete</button>
+        <button class="btn btn-danger" data-del-cat="${id}">Delete</button>
       </div>`;
     catListEl.appendChild(li);
   });
 
-  // Bind borrar
   catListEl.querySelectorAll('[data-del-cat]').forEach(btn=>{
     btn.onclick = () => deleteCategory(btn.dataset.delCat);
   });
@@ -63,22 +111,14 @@ async function loadCategories(){
 
 async function createCategory(name, desc){
   const res = await api.post('/categorias', { nombre: name, descripcion: desc });
-  if (!res.ok) {
-    const e = await res.json().catch(()=>({}));
-    throw new Error(e.message || `Error ${res.status}`);
-  }
+  if (!res.ok) throw new Error(await res.text() || `Error ${res.status}`);
 }
 async function deleteCategory(id){
   const res = await api.del(`/categorias/${id}`);
-  if (!res.ok) {
-    const e = await res.json().catch(()=>({}));
-    alert(e.message || `Error ${res.status}`);
-    return;
-  }
+  if (!res.ok) { alert(await res.text() || `Error ${res.status}`); return; }
   await loadCategories();
 }
 
-// Form de nueva categoría
 document.getElementById('newCatForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const nombre = document.getElementById('catName').value.trim();
@@ -87,9 +127,7 @@ document.getElementById('newCatForm').addEventListener('submit', async (e)=>{
     await createCategory(nombre, descripcion);
     e.target.reset();
     await loadCategories();
-  }catch(err){
-    alert(err.message);
-  }
+  }catch(err){ alert(err.message); }
 });
 
 // ---------- Tareas ----------
@@ -98,52 +136,131 @@ async function loadMyTasks(){
   const res = await api.get('/tareas/usuario');
   const data = await res.json();
   if (!res.ok) { taskListEl.innerHTML = `<li class="muted">Error: ${data.message||res.status}</li>`; return; }
-
-  // Se asume arreglo con {ID, Texto, FechaTentativaFin, Estado, Categoria:{Nombre}}
-  renderTasks(data || []);
+  ALL_TASKS = data || [];
+  renderTasks(ALL_TASKS);
 }
 
-function renderTasks(tasks){
+function normalizeStatus(s){ return /final/i.test(s||'') ? 'Finalizada' : 'En progreso'; }
+
+function renderTasks(tasks, q=''){
   taskListEl.innerHTML = '';
-  tasks.forEach(t=>{
-    const id = t.ID ?? t.id ?? t.Id;
-    const texto = t.Texto ?? t.texto;
-    const estado = (t.Estado ?? t.estado ?? 'En progreso');
-    const fecha = (t.FechaTentativaFin ?? t.fechaTentativaFin) || '';
-    const cat   = t.Categoria?.Nombre ?? t.categoria?.nombre ?? '—';
+  const filtered = tasks.filter(t=>{
+    const estado = normalizeStatus(t.Estado ?? t.estado);
+    if (CURRENT_FILTER === 'inprogress' && estado !== 'En progreso') return false;
+    if (CURRENT_FILTER === 'finalizada' && estado !== 'Finalizada') return false;
+    if (q && !(t.Texto ?? t.texto ?? '').toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  if (!filtered.length){ taskListEl.innerHTML = '<li class="muted">No tasks</li>'; return; }
+
+  filtered.forEach(t=>{
+    const id     = t.ID ?? t.id ?? t.Id;
+    const texto  = t.Texto ?? t.texto ?? '';
+    const estado = normalizeStatus(t.Estado ?? t.estado);
+    const fecha  = (t.FechaTentativaFin ?? t.fechaTentativaFin) || '';
+    const catId  = t.Categoria?.ID ?? t.categoria?.id ?? '';
+    const catNm  = t.Categoria?.Nombre ?? t.categoria?.nombre ?? '—';
 
     const li = document.createElement('li');
     li.className = 'item';
     li.innerHTML = `
       <div class="meta">
-        <strong>${texto}</strong>
-        <small>Due: ${fecha || '—'} · <span class="badge">${cat}</span></small>
+        <strong data-view-text="${id}">${texto}</strong>
+        <div class="row">
+          <small>Due: ${fecha || '—'} · <span class="badge">${catNm}</span> · <span class="pill ${estado==='Finalizada'?'done':''}">${estado}</span></small>
+        </div>
+
+        <!-- Panel de edición (oculto por defecto) -->
+        <div class="row hidden" data-edit-panel="${id}">
+          <input class="inline" type="text" value="${texto}" data-edit-text="${id}" />
+          <input class="inline" type="date" value="${fecha}" data-edit-date="${id}" />
+          <select class="inline" data-edit-cat="${id}">${taskCatSel.innerHTML}</select>
+          <select class="inline" data-edit-status="${id}">
+            <option ${estado==='En progreso'?'selected':''}>En progreso</option>
+            <option ${estado==='Finalizada'?'selected':''}>Finalizada</option>
+          </select>
+        </div>
       </div>
+
       <div class="actions">
-        <select data-status="${id}">
-          <option ${/Finalizada/i.test(estado)?'':'selected'}>En progreso</option>
-          <option ${/Finalizada/i.test(estado)?'selected':''}>Finalizada</option>
-        </select>
-        <button class="btn btn-light" data-save="${id}">Save</button>
+        <button class="btn btn-light" data-edit="${id}">Edit</button>
+        <button class="btn btn-success hidden" data-save="${id}">Save</button>
+        <button class="btn btn-light hidden" data-cancel="${id}">Cancel</button>
+        <button class="btn btn-primary" data-finish="${id}" ${estado==='Finalizada'?'disabled':''}>Finalize</button>
         <button class="btn btn-danger" data-del="${id}">Delete</button>
       </div>`;
     taskListEl.appendChild(li);
+
+    // set select category to current
+    const sel = li.querySelector(`[data-edit-cat="${id}"]`);
+    if (sel && catId) sel.value = String(catId);
   });
 
-  // Bind acciones
+  bindTaskActions();
+}
+
+function bindTaskActions(){
+  taskListEl.querySelectorAll('[data-edit]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = btn.dataset.edit;
+      const panel = taskListEl.querySelector(`[data-edit-panel="${id}"]`);
+      const save  = taskListEl.querySelector(`[data-save="${id}"]`);
+      const cancel= taskListEl.querySelector(`[data-cancel="${id}"]`);
+      panel.classList.remove('hidden');
+      save.classList.remove('hidden');
+      cancel.classList.remove('hidden');
+      btn.classList.add('hidden');
+    };
+  });
+
+  taskListEl.querySelectorAll('[data-cancel]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = btn.dataset.cancel;
+      const panel = taskListEl.querySelector(`[data-edit-panel="${id}"]`);
+      const edit  = taskListEl.querySelector(`[data-edit="${id}"]`);
+      const save  = taskListEl.querySelector(`[data-save="${id}"]`);
+      panel.classList.add('hidden'); save.classList.add('hidden'); btn.classList.add('hidden'); edit.classList.remove('hidden');
+    };
+  });
+
   taskListEl.querySelectorAll('[data-save]').forEach(btn=>{
     btn.onclick = async ()=>{
       const id = btn.dataset.save;
-      const statusSel = taskListEl.querySelector(`[data-status="${id}"]`);
-      const estado = statusSel.value;
-      await updateTask(id, { estado });
-      await loadMyTasks();
+      const textInp = taskListEl.querySelector(`[data-edit-text="${id}"]`);
+      const dateInp = taskListEl.querySelector(`[data-edit-date="${id}"]`);
+      const catSel  = taskListEl.querySelector(`[data-edit-cat="${id}"]`);
+      const stSel   = taskListEl.querySelector(`[data-edit-status="${id}"]`);
+
+      const body = {};
+      if (textInp && textInp.value.trim()) body.texto = textInp.value.trim();
+      if (dateInp && dateInp.value) body.fechaTentativaFin = dateInp.value;
+      if (catSel && catSel.value) body.id_categoria = Number(catSel.value);
+      if (stSel && stSel.value) body.estado = stSel.value;
+
+      try{
+        await updateTask(id, body);
+        await loadMyTasks();
+      }catch(err){ alert(err.message); }
     };
   });
+
+  taskListEl.querySelectorAll('[data-finish]').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const id = btn.dataset.finish;
+      try{
+        await updateTask(id, { estado: 'Finalizada' });
+        await loadMyTasks();
+      }catch(err){ alert(err.message); }
+    };
+  });
+
   taskListEl.querySelectorAll('[data-del]').forEach(btn=>{
     btn.onclick = async ()=>{
-      await deleteTask(btn.dataset.del);
-      await loadMyTasks();
+      try{
+        await deleteTask(btn.dataset.del);
+        await loadMyTasks();
+      }catch(err){ alert(err.message); }
     };
   });
 }
@@ -153,30 +270,17 @@ async function createTask({ texto, fechaTentativaFin, id_categoria }){
   if (fechaTentativaFin) body.fechaTentativaFin = fechaTentativaFin;
   if (id_categoria) body.id_categoria = Number(id_categoria);
   const res = await api.post('/tareas', body);
-  if (!res.ok) {
-    const e = await res.json().catch(()=>({}));
-    throw new Error(e.message || `Error ${res.status}`);
-  }
+  if (!res.ok) throw new Error(await res.text() || `Error ${res.status}`);
 }
-async function updateTask(id, { texto, estado }){
-  const body = {};
-  if (texto) body.texto = texto;
-  if (estado) body.estado = estado;
+async function updateTask(id, body){
   const res = await api.put(`/tareas/${id}`, body);
-  if (!res.ok) {
-    const e = await res.json().catch(()=>({}));
-    throw new Error(e.message || `Error ${res.status}`);
-  }
+  if (!res.ok) throw new Error(await res.text() || `Error ${res.status}`);
 }
 async function deleteTask(id){
   const res = await api.del(`/tareas/${id}`);
-  if (!res.ok) {
-    const e = await res.json().catch(()=>({}));
-    throw new Error(e.message || `Error ${res.status}`);
-  }
+  if (!res.ok) throw new Error(await res.text() || `Error ${res.status}`);
 }
 
-// Form nueva tarea
 document.getElementById('newTaskForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const texto = document.getElementById('taskText').value.trim();
@@ -187,7 +291,5 @@ document.getElementById('newTaskForm').addEventListener('submit', async (e)=>{
     await createTask({ texto, fechaTentativaFin, id_categoria });
     e.target.reset();
     await loadMyTasks();
-  }catch(err){
-    alert(err.message);
-  }
+  }catch(err){ alert(err.message); }
 });
