@@ -74,3 +74,13 @@
 .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:#f8fafc;}
 .pill.done{background:#ecfdf5;border-color:#bbf7d0;}
 .btn[disabled]{opacity:.6;cursor:not-allowed;}
+
+.hidden{display:none;}
+.meta-line{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.muted{color:var(--muted);}
+
+.form-hint{margin-top:8px;font-size:.9rem;}
+.form-hint.error{color:#ef4444;}
+
+/* que hidden gane incluso sobre .row u otros selectores más específicos */
+.hidden { display: none !important; }
