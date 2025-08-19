@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Log in</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="center-screen">
+  <div class="card auth">
+    <h2>Log in</h2>
+    <form id="loginForm" class="form">
+      <!-- Tu endpoint de login usa "nombre" (no email) -->
+      <input id="nombre" type="text" placeholder="Username" required />
+      <input id="contrasena" type="password" placeholder="Password" required />
+      <button class="btn btn-primary" type="submit">Log in</button>
+      <p class="muted">Don’t have an account? <a href="register.html">Sign up</a></p>
+    </form>
+    <div id="loginMsg" class="msg"></div>
+  </div>
+
+  <script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  const form = document.getElementById('loginForm');
+  const msg  = document.getElementById('loginMsg');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.textContent = '';
+
+    const nombre = document.getElementById('nombre').value.trim();
+    const contrasena = document.getElementById('contrasena').value;
+
+    try {
+      const res = await api.post('/usuarios/iniciar-sesion', { nombre, contrasena });
+      const data = await res.json();
+
+      if (!res.ok || !data.token) throw new Error(data.message || 'Invalid credentials');
+
+      auth.saveToken(data.token);
+      localStorage.setItem('username', nombre); // <--- para userbar
+      window.location.href = 'app.html';
+    } catch (err) {
+      msg.textContent = err.message;
+      msg.classList.add('error');
+    }
+  });
+</script>
+
+</body>
+</html>

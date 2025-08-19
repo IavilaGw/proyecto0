@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Create your account</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="center-screen">
+  <div class="card auth">
+    <h2>Create your account</h2>
+    <form id="registerForm" class="form">
+      <input id="nombre" type="text" placeholder="Full name" required />
+      <!-- El backend NO usa email; lo dejamos opcional solo para UI -->
+      <input id="email" type="email" placeholder="Email (optional)" />
+      <input id="contrasena" type="password" placeholder="Password" required />
+      <input id="imagen" type="text" placeholder="Profile image URL (optional)" />
+      <button class="btn btn-success" type="submit">Sign up</button>
+      <p class="muted">Already have an account? <a href="login.html">Log in</a></p>
+    </form>
+    <div id="regMsg" class="msg"></div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    const form = document.getElementById('registerForm');
+    const msg  = document.getElementById('regMsg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+
+      const nombre = document.getElementById('nombre').value.trim();
+      const contrasena = document.getElementById('contrasena').value;
+      const imagen = document.getElementById('imagen').value.trim();
+
+      // El backend espera: nombre, contrasena, "imagen-perfil" (con guion)
+      const body = { nombre, contrasena };
+      if (imagen) body["imagen-perfil"] = imagen;
+
+      try {
+        const res = await api.post('/usuarios', body); // 201
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.message || `Error ${res.status}`);
+        }
+        // Opcional: auto-login tras crear usuario
+        window.location.href = 'login.html';
+      } catch (err) {
+        msg.textContent = err.message;
+        msg.classList.add('error');
+      }
+    });
+  </script>
+</body>
+</html>
