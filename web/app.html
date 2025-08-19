@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>My Tasks • TaskMaster</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="app">
+  <aside class="sidebar">
+    <div class="brand">TaskMaster</div>
+    <nav class="menu">
+      <button class="menu-item active" data-view="inbox">Inbox</button>
+      <button class="menu-item" data-view="mytasks">My Tasks</button>
+      <button class="menu-item" data-view="upcoming">Upcoming</button>
+      <button class="menu-item" data-view="completed">Completed</button>
+      <button class="menu-item" data-view="categories">Categories</button>
+    </nav>
+    <div class="spacer"></div>
+    <button id="logoutBtn" class="btn btn-light">Log out</button>
+  </aside>
+
+  <main class="content">
+    <header class="content-header">
+      <h1 id="viewTitle">My Tasks</h1>
+      <input id="search" class="search" placeholder="Search tasks" />
+    </header>
+
+    <section id="tasksSection" class="panel">
+      <div class="tabs">
+        <button class="tab active" data-filter="all">All</button>
+        <button class="tab" data-filter="inprogress">In Progress</button>
+        <button class="tab" data-filter="completed">Completed</button>
+      </div>
+      <ul id="taskList" class="list"></ul>
+
+      <div class="new">
+        <h3>New Task</h3>
+        <form id="newTaskForm" class="row gap wrap">
+          <input id="taskText" type="text" placeholder="Task text" required />
+          <input id="taskDate" type="date" />
+          <select id="taskCat" required></select>
+          <button class="btn btn-primary" type="submit">Create</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="categoriesSection" class="panel hidden">
+      <h2>Categories</h2>
+      <form id="newCatForm" class="row gap wrap">
+        <input id="catName" type="text" placeholder="Name" required />
+        <input id="catDesc" type="text" placeholder="Description" required />
+        <button class="btn btn-success" type="submit">Create</button>
+      </form>
+      <ul id="catList" class="list"></ul>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

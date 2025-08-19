@@ -36,5 +36,15 @@ services:
       - "${PORT:-8080}:8080"
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.proxy
+    container_name: proyecto0-web
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
 volumes:
   pgdata: {}
