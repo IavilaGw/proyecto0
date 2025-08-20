@@ -66,7 +66,7 @@ A TodoList application built with Go (Gin framework) and a modern web frontend, 
 ### Accessing the Application
 
 - **Frontend**: http://localhost:80
-- **API**: http://localhost:8080
+- **Check API Health**: http://localhost:8080/health
 
 ### Stopping Services
 
