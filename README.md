@@ -4,10 +4,10 @@ A TodoList application built with Go (Gin framework) and a modern web frontend, 
 
 # Team
 
-* Ivan Avila - 202216280
-* Raul Insuasty - 202015512
-* Ana María Sánchez Mejía - 202013587
-* David Tobón Molina - 202123804
+### Ivan Avila - 202216280
+### Raul Insuasty - 202015512
+### Ana María Sánchez Mejía - 202013587
+### David Tobón Molina - 202123804
 
 
 ## Tech Stack
