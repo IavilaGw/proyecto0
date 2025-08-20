@@ -74,7 +74,7 @@ A TodoList application built with Go (Gin framework) and a modern web frontend, 
 # Stop all services
 docker-compose down
 
-# Stop and remove volumes (⚠️ This will delete all data)
+# Stop and remove volumes (This will delete all data)
 docker-compose down -v
 ```
 
