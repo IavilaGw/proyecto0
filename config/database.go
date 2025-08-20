@@ -49,7 +49,7 @@ func Connect() {
 func loadEnv() {
 	// Intentar cargar desde .env
 	if err := godotenv.Load(); err != nil {
-		log.Println("⚠️  Archivo .env no encontrado, usando variables de entorno del sistema")
+		log.Println("Archivo .env no encontrado, usando variables de entorno del contendor")
 	}
 
 	// Validar variables requeridas

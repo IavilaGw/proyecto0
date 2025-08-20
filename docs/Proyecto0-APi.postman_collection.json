@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "6be9d978-9cad-4ab6-ae96-c74d151b1095",
-		"name": "Proyecto0-APi",
+		"_postman_id": "abbbb7f1-7ec1-4d52-9c32-bb9dd23ae168",
+		"name": "Proyecto0-API",
+		"description": "Pruebas para la API de la API del Proyecto0-TaskMaster",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "30033067"
+		"_exporter_id": "37575255"
 	},
 	"item": [
 		{
@@ -164,35 +165,30 @@
 			"response": []
 		},
 		{
-			"name": "Eliminar categoria",
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
+			"name": "Listar categorias",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response list has a length of 1\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('array').that.has.lengthOf(1);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
 					}
-				],
-				"url": {
-					"raw": "http://localhost:8080/api/v1/categorias/{{categoria_id}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"v1",
-						"categorias",
-						"{{categoria_id}}"
-					]
 				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
 			},
-			"response": []
-		},
-		{
-			"name": "Listar categoria",
 			"request": {
 				"method": "GET",
 				"header": [
@@ -202,6 +198,10 @@
 						"type": "text"
 					}
 				],
+				"body": {
+					"mode": "raw",
+					"raw": "\n"
+				},
 				"url": {
 					"raw": "http://localhost:8080/api/v1/categorias",
 					"protocol": "http",
@@ -267,7 +267,128 @@
 			"response": []
 		},
 		{
+			"name": "Obtener tarea por ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"\r",
+							"// Check if the ID matches tarea_id\r",
+							"pm.test(\"ID matches tarea_id\", function () {\r",
+							"    pm.expect(response.ID).to.equal(parseInt(pm.variables.get(\"tarea_id\")));\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\n"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/tareas/{{tarea_id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"tareas",
+						"{{tarea_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Tareas de Usuario",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response list has a length of 1\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('array').that.has.lengthOf(1);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/tareas/usuario",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"tareas",
+						"usuario"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Actualizar tarea",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Estado should be 'Finalizada'\", function () {\r",
+							"    const response = pm.response.json();\r",
+							"    pm.expect(response.estado).to.equal(\"Finalizada\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "PUT",
 				"header": [
@@ -304,7 +425,69 @@
 			"response": []
 		},
 		{
+			"name": "Eliminar categoria",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\n"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/categorias/{{categoria_id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"categorias",
+						"{{categoria_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Eliminar tarea",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "DELETE",
 				"header": [
@@ -334,62 +517,6 @@
 				}
 			},
 			"response": []
-		},
-		{
-			"name": "Tareas de Usuario",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:8080/api/v1/tareas/usuario",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"v1",
-						"tareas",
-						"usuario"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Obtener tarea por ID",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:8080/api/v1/tareas/{{tarea_id}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"v1",
-						"tareas",
-						"{{tarea_id}}"
-					]
-				}
-			},
-			"response": []
 		}
 	],
 	"variable": [
@@ -403,6 +530,10 @@
 		},
 		{
 			"key": "tarea_id",
+			"value": ""
+		},
+		{
+			"key": "categoria_id2",
 			"value": ""
 		}
 	]
