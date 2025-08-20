@@ -1,16 +1,23 @@
 # Proyecto0 - TodoList API
 
+## team
+
+* Ivan Avila - 202216280
+* Raul Insuasty - 202015512
+* Ana María Sánchez Mejía - 202013587
+* David Tobón Molina - 202123804
+
 A full-stack TodoList application built with Go (Gin framework) and a modern web frontend, containerized with Docker.
 
-## 🏗️ Architecture
+## Tech Stack
 
 - **Backend**: Go API with Gin framework, GORM ORM, and PostgreSQL
-- **Frontend**: HTML/CSS/JavaScript with Nginx reverse proxy
+- **Frontend**: HTML, CSS, JavaScript
 - **Database**: PostgreSQL 16
 - **Authentication**: JWT-based authentication
 - **Containerization**: Docker with docker-compose
 
-## 🚀 Quick Start with Docker
+## Quickstart
 
 ### Prerequisites
 
@@ -57,31 +64,6 @@ A full-stack TodoList application built with Go (Gin framework) and a modern web
 - **Frontend**: http://localhost:80
 - **API**: http://localhost:8080
 - **Database**: localhost:5433 (PostgreSQL)
-
-### Default Credentials
-
-- **Database**:
-  - Host: `localhost` (or `db` from within containers)
-  - Port: `5433`
-  - Database: `proyecto0`
-  - Username: `username`
-  - Password: `password`
-
-- **JWT Secret**: `equipo-pregrado`
-
-## 🛠️ Development
-
-### Rebuilding Services
-
-If you make changes to the code, rebuild the services:
-
-```bash
-# Rebuild and restart all services
-docker-compose up -d --build
-
-# Rebuild specific service
-docker-compose up -d --build api
-```
 
 ### Stopping Services
 
@@ -198,12 +180,12 @@ docker exec -it proyecto0-api sh
 docker exec -it proyecto0-db psql -U username -d proyecto0
 ```
 
-## 📚 API Documentation
+## API Documentation with Postman
 
 The API documentation is available in the `docs/` folder as a Postman collection:
 - `docs/Proyecto0-APi.postman_collection.json`
 
-## 🧹 Cleanup
+## Cleanup
 
 ```bash
 # Stop and remove containers
@@ -215,14 +197,6 @@ docker-compose down -v
 # Remove all unused Docker resources
 docker system prune -a
 ```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test with Docker
-5. Submit a pull request
 
 ## 📄 License
 
