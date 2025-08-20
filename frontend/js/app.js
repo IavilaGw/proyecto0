@@ -14,28 +14,63 @@ const avatarEl = document.getElementById('avatar');
 const changeAvatarBtn = document.getElementById('changeAvatarBtn');
 const setAvatarUrlBtn = document.getElementById('setAvatarUrlBtn');
 const avatarFile = document.getElementById('avatarFile');
+const removeAvatarBtn = document.getElementById('removeAvatarBtn'); // (opcional si agregas el botón)
+
+function currentUsername() {
+  return localStorage.getItem('username') || '';
+}
+function avatarKeyFor(user) {
+  return user ? `u:${user}:avatarUrl` : 'avatarUrl';
+}
 
 function loadUserbar(){
-  const name = localStorage.getItem('username') || 'User';
-  const stored = localStorage.getItem('avatarUrl');
-  const avatar = stored || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=E5E7EB&color=111827`;
-  unameEl && (unameEl.textContent = name);
-  avatarEl && (avatarEl.src = avatar);
+  const name = currentUsername() || 'User';
+
+  // 1) avatar elegido por el usuario (local, por-usuario)
+  const localAvatar = localStorage.getItem(avatarKeyFor(name));
+
+  // 2) avatar que pudo guardarse al registrarse (si el usuario puso URL allí)
+  const serverAvatar = localStorage.getItem(`u:${name}:serverAvatar`);
+
+  // 3) placeholder si no hay nada
+  const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=E5E7EB&color=111827`;
+
+  const img = localAvatar || serverAvatar || fallback;
+
+  if (unameEl)  unameEl.textContent = name;
+  if (avatarEl) avatarEl.src = img;
 }
-if (changeAvatarBtn) changeAvatarBtn.onclick = ()=> avatarFile.click();
+
+// Subir archivo (lo guarda por-usuario)
+if (changeAvatarBtn) changeAvatarBtn.onclick = () => avatarFile?.click();
 if (avatarFile) avatarFile.onchange = (e)=>{
   const file = e.target.files?.[0];
   if (!file) return;
   const rd = new FileReader();
-  rd.onload = () => { localStorage.setItem('avatarUrl', rd.result); loadUserbar(); };
+  rd.onload = () => {
+    const name = currentUsername();
+    localStorage.setItem(avatarKeyFor(name), rd.result);
+    loadUserbar();
+  };
   rd.readAsDataURL(file);
 };
+
+// Pegar URL (lo guarda por-usuario)
 if (setAvatarUrlBtn) setAvatarUrlBtn.onclick = ()=>{
   const url = prompt('Paste image URL');
   if (!url) return;
-  localStorage.setItem('avatarUrl', url);
+  const name = currentUsername();
+  localStorage.setItem(avatarKeyFor(name), url);
   loadUserbar();
 };
+
+// Quitar foto personalizada (vuelve a server/placeholder)
+if (removeAvatarBtn) removeAvatarBtn.onclick = ()=>{
+  const name = currentUsername();
+  localStorage.removeItem(avatarKeyFor(name));
+  loadUserbar();
+};
+
 
 // ---- Auth/logout ----
 const logoutBtn = document.getElementById('logoutBtn');
