@@ -30,9 +30,11 @@ A TodoList application built with Go (Gin framework) and a modern web frontend, 
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repository-url>
+   git clone https://github.com/IavilaGw/proyecto0.git
    cd proyecto0
    ```
+
+   Or download the source code in a _.zip_ file.
 
 2. **Start all services**
    ```bash
