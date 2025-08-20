@@ -9,7 +9,7 @@ A TodoList application built with Go (Gin framework) and a modern web frontend, 
 ### Ana María Sánchez Mejía - 202013587
 ### David Tobón Molina - 202123804
 
-//
+
 
 ## Tech Stack
 
