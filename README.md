@@ -1,7 +1,6 @@
 # Proyecto0 - TaskMaster
 
 A TodoList application built with Go (Gin framework) and a modern web frontend, containerized with Docker.
-VIDEO DEMO: https://youtu.be/GyCNcmRjayk
 
 # Team
 
@@ -10,7 +9,7 @@ VIDEO DEMO: https://youtu.be/GyCNcmRjayk
 ### Ana María Sánchez Mejía - 202013587
 ### David Tobón Molina - 202123804
 
-# Demonstration Video
+#[ Demonstration Video](https://youtu.be/GyCNcmRjayk)
 
 ## Tech Stack
 
