@@ -1,4 +1,6 @@
-# Proyecto0 - TodoList API
+# Proyecto0 - TaskMaster
+
+A todo list web app
 
 # Team
 
