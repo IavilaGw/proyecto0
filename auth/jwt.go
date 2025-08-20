@@ -7,13 +7,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var secret = []byte(func() string {
-	s := os.Getenv("JWT_SECRET")
-	if s == "" {
-		return "super-secret"
+func getSecret() []byte {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		panic("JWT_SECRET no está configurado")
 	}
-	return s
-}())
+	return []byte(secret)
+}
 
 type Claims struct {
 	UserID   uint   `json:"user_id"`
@@ -34,12 +34,12 @@ func GenerateToken(id uint, username string, ttl time.Duration) (string, error) 
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(secret)
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(getSecret())
 }
 
 func ParseToken(tokenStr string) (*Claims, error) {
 	tok, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(_ *jwt.Token) (any, error) {
-		return secret, nil
+		return getSecret(), nil
 	})
 	if err != nil || !tok.Valid {
 		return nil, err

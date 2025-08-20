@@ -72,7 +72,8 @@ init();
 async function init(){
   if (!auth.isLogged()) { location.href = 'login.html'; return; }
   loadUserbar();
-  await Promise.all([loadCategories(), loadMyTasks()]);
+  await loadCategories();  // Load categories first
+  await loadMyTasks();     // Then load tasks
 }
 
 // ========== Helpers ==========
@@ -88,21 +89,6 @@ function formatDue(s){
   const v = toDateInputValue(s);
   return v || '—';
 }
-function getCategoryId(t){
-  return t.IdCategoria ?? t.idCategoria ?? t.id_categoria ??
-         t.CategoriaID ?? t.categoriaId ?? t.categoria_id ??
-         t.Categoria?.ID ?? t.categoria?.id ?? null;
-}
-function getCategoryName(t){
-  // si viene anidada, úsala
-  const nested = t.Categoria?.Nombre ?? t.categoria?.nombre;
-  if (nested) return nested;
-  // si solo viene el id, búscalo en CATEGORIES
-  const cid = getCategoryId(t);
-  if (!cid) return '—';
-  const found = CATEGORIES.find(c => (c.ID ?? c.id ?? c.Id) == cid);
-  return found ? (found.Nombre ?? found.nombre ?? '—') : '—';
-}
 
 function show401Redirect(res){
   if (res.status === 401) {
@@ -115,8 +101,10 @@ function show401Redirect(res){
 
 // ========== Categorías ==========
 async function loadCategories(){
+  console.log('CARGANDO CATEGORIAS')
   catListEl.innerHTML = '<li class="muted">Loading…</li>';
   const res = await api.get('/categorias');
+  console.log(res);
   if (show401Redirect(res)) return;
   const data = await res.json().catch(()=>[]);
   if (!res.ok) { catListEl.innerHTML = `<li class="muted">Error: ${data?.message||res.status}</li>`; return; }
@@ -179,11 +167,36 @@ document.getElementById('newCatForm')?.addEventListener('submit', async (e)=>{
 
 // ========== Tareas ==========
 async function loadMyTasks(){
+  // Wait for categories to be loaded first
+  if (!CATEGORIES.length) {
+    console.log("No categories loaded, loading them first...");
+    await loadCategories();
+  }
+  
+  console.log("Starting to load tasks...");
   taskListEl.innerHTML = '<li class="muted">Loading…</li>';
+  
   const res = await api.get('/tareas/usuario');
+  console.log("API response status:", res.status);
+  
   if (show401Redirect(res)) return;
   const data = await res.json().catch(()=>[]);
-  if (!res.ok) { taskListEl.innerHTML = `<li class="muted">Error: ${data?.message||res.status}</li>`; return; }
+  console.log("Parsed response data:", data);
+  
+  if (!res.ok) { 
+    console.log("API error:", res.status, data);
+    taskListEl.innerHTML = `<li class="muted">Error: ${data?.message||res.status}</li>`; 
+    return; 
+  }
+   
+  // Debug: log the first task to see its structure
+  if (data && data.length > 0) {
+    console.log('First task data:', data[0]);
+    console.log('Categories array:', CATEGORIES);
+  } else {
+    console.log("No data received");
+  }
+   
   ALL_TASKS = data || [];
   renderTasks(ALL_TASKS);
 }
@@ -196,12 +209,13 @@ function getCategoryId(t){
 }
 function getCategoryName(t){
   // si viene anidada, úsala
-  const nested = t.Categoria?.Nombre ?? t.categoria?.nombre;
+  const nested = t.Categoria?.nombre ?? t.categoria?.nombre;
+
   if (nested) return nested;
   // si vino solo el id, búscalo en el arreglo global CATEGORIES
   const cid = getCategoryId(t);
   if (!cid) return '—';
-  const list = (window.CATEGORIES || []); // asegúrate de asignarla en loadCategories
+  const list = CATEGORIES || [];
   const found = list.find(c => (c.ID ?? c.id ?? c.Id) == cid);
   return found ? (found.Nombre ?? found.nombre ?? '—') : '—';
 }
@@ -228,7 +242,6 @@ function renderTasks(tasks, q=''){
     const estado = normalizeStatus(t.Estado ?? t.estado);
     const fecha  = (t.FechaTentativaFin ?? t.fechaTentativaFin) || '';
 
-    // <- NUEVO: resolvemos categoría por helper
     const catId  = getCategoryId(t) || '';
     const catNm  = getCategoryName(t);
 
@@ -261,7 +274,7 @@ function renderTasks(tasks, q=''){
         <button class="btn btn-light" data-edit="${id}">Edit</button>
         <button class="btn btn-success hidden" data-save="${id}">Save</button>
         <button class="btn btn-light hidden" data-cancel="${id}">Cancel</button>
-        <button class="btn btn-primary" data-finish="${id}" ${estado==='Finalizada'?'disabled':''}>Finalize</button>
+        <button class="btn btn-primary" data-finish="${id}" ${estado==='Finalizada'?'disabled':''}>Complete</button>
         <button class="btn btn-danger" data-del="${id}">Delete</button>
       </div>`;
 

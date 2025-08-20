@@ -14,14 +14,14 @@ RUN go mod download
 COPY . .
 
 # Compila el binario (tu main está en cmd/)
-RUN CGO_ENABLED=0 GOOS=linux go build -o server ./cmd
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/main.go
 
 # ====== Etapa runtime ======
 FROM alpine:3.20
 WORKDIR /app
 RUN apk add --no-cache ca-certificates tzdata
-COPY --from=builder /app/server /app/server
+COPY --from=builder /app/main .
 ENV PORT=8080
 EXPOSE 8080
-CMD ["/app/server"]
+CMD ["./main"]
 
