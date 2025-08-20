@@ -1,6 +1,6 @@
 # Proyecto0 - TodoList API
 
-## team
+# Team
 
 * Ivan Avila - 202216280
 * Raul Insuasty - 202015512
