@@ -174,12 +174,8 @@
 						"type": "text"
 					}
 				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"nombre\": \"Trabajo\",\n  \"descripcion\": \"Tareas relacionadas al trabajo\"\n}\n"
-				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/categorias/{{id_categoria}}",
+					"raw": "http://localhost:8080/api/v1/categorias/{{categoria_id}}",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -189,7 +185,7 @@
 						"api",
 						"v1",
 						"categorias",
-						"{{id_categoria}}"
+						"{{categoria_id}}"
 					]
 				}
 			},
@@ -197,9 +193,6 @@
 		},
 		{
 			"name": "Listar categoria",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
 			"request": {
 				"method": "GET",
 				"header": [
@@ -209,10 +202,6 @@
 						"type": "text"
 					}
 				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"nombre\": \"Trabajo\",\n  \"descripcion\": \"Tareas relacionadas al trabajo\"\n}\n"
-				},
 				"url": {
 					"raw": "http://localhost:8080/api/v1/categorias",
 					"protocol": "http",
@@ -376,9 +365,6 @@
 		},
 		{
 			"name": "Obtener tarea por ID",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
 			"request": {
 				"method": "GET",
 				"header": [
@@ -388,10 +374,6 @@
 						"type": "text"
 					}
 				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"texto\": \"Preparar presentación\",\n  \"fechaTentativaFin\": \"2025-08-25\",\n  \"id_categoria\":4\n}\n"
-				},
 				"url": {
 					"raw": "http://localhost:8080/api/v1/tareas/{{tarea_id}}",
 					"protocol": "http",
