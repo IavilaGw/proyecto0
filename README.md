@@ -1,6 +1,6 @@
 # Proyecto0 - TaskMaster
 
-A todo list web app.
+A TodoList application built with Go (Gin framework) and a modern web frontend, containerized with Docker.
 
 # Team
 
@@ -9,7 +9,6 @@ A todo list web app.
 * Ana María Sánchez Mejía - 202013587
 * David Tobón Molina - 202123804
 
-A full-stack TodoList application built with Go (Gin framework) and a modern web frontend, containerized with Docker.
 
 ## Tech Stack
 
